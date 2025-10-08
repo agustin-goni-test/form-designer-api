@@ -34,3 +34,5 @@ def get_time():
         "hour": hour,
         "timezone": now.tzname() or str(now.utcoffset())
     }
+
+
