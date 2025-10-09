@@ -105,3 +105,44 @@ def update_form(form_id: int, form: Form):
         # Close the cursor and connection
         cursor.close()
         close_connection()
+
+
+# Method name needs to be different from the router method name
+def delete_form_from_db(form_id: int):
+    '''
+    Delete a form from the database.
+
+    Receives the form ID and deletes the corresponding form.
+    Returns a success message if deletion was successful.
+    '''
+
+    # Create connectio and cursor
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        # First check if the form exists
+        cursor.execute('SELECT id FROM form_definition.forms WHERE id = %s;', (form_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail=f"Form with id={form_id} not found")
+        
+        # If it exists, delete it
+        cursor.execute('DELETE FROM form_definition.forms WHERE id = %s;', (form_id,))
+
+        # Commit changes
+        conn.commit()
+
+        return {"status": "success", "message": f"Form with id={form_id} deleted"}
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        # Rollback in case of error
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error deleting form: {str(e)}")
+
+    finally:
+        # Close cursor and connection
+        cursor.close()
+        close_connection()
