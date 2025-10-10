@@ -47,13 +47,15 @@ def create_form(form: Form):
         close_connection()
 
 
-def update_form(form_id: int, form: Form):
+def update_form(form_id: int, udpate_key: bool, form: Form):
     """
     Handle updating an existing form in the database.
 
     Takes a form ID and a Form object as input.
     Updates the corresponding form in the database.
     Returns the updated form details.
+
+    Parameter update_key indicates whether to update the 'key' field or keep the existing one.
     """
 
     # Get the connection to the database
@@ -64,11 +66,13 @@ def update_form(form_id: int, form: Form):
 
     try:
         # Check if the form with the given ID exists
-        cursor.execute('SELECT id FROM form_definition.forms WHERE id = %s;', (form_id,))
+        cursor.execute('SELECT id, key FROM form_definition.forms WHERE id = %s;', (form_id,))
         existing_form = cursor.fetchone()
 
         if existing_form is None:
             raise HTTPException(status_code=404, detail=f"Form with id={form_id} not found")
+        
+        new_key = form.key if udpate_key else existing_form['key']
         
         # If it exists, update it
         cursor.execute('''
@@ -79,7 +83,7 @@ def update_form(form_id: int, form: Form):
                 updated_at = now()
             WHERE id = %s
             RETURNING id, key, name, description, created_at, updated_at;
-        ''', (form.key, form.name, form.description, form_id))
+        ''', (new_key, form.name, form.description, form_id))
 
         # Load updated form
         updated_form = cursor.fetchone()
@@ -144,5 +148,71 @@ def delete_form_from_db(form_id: int):
 
     finally:
         # Close cursor and connection
+        cursor.close()
+        close_connection()
+
+
+def get_form_from_db(form_id: int):
+    '''
+    Retrieve form details from the database.
+
+    Receives the form ID and returns the corresponding form details.
+    '''
+
+    # Get the connection to the database
+    conn = get_connection()
+
+    # Create a cursor
+    cursor = conn.cursor()
+
+    try:
+        # Fetch the form with the given ID
+        cursor.execute('SELECT id, key, name, description, created_at, updated_at FROM form_definition.forms WHERE id = %s;', (form_id,))
+        form = cursor.fetchone()
+
+        if form is None:
+            raise HTTPException(status_code=404, detail=f"Form with id={form_id} not found")
+
+        return {"status": "success", "form": form}
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        # Raise an HTTP exception
+        raise HTTPException(status_code=500, detail=f"Error retrieving form: {str(e)}")
+    
+    finally:
+        # Close the cursor and connection
+        cursor.close()
+        close_connection()
+
+
+def list_forms():
+    '''
+    List all forms in the database.
+
+    Returns a list of all forms with their details.
+    '''
+
+    # Get the connection to the database
+    conn = get_connection()
+
+    # Create a cursor
+    cursor = conn.cursor()
+
+    try:
+        # Fetch all forms
+        cursor.execute('SELECT id, key, name, description, created_at, updated_at FROM form_definition.forms;')
+        forms = cursor.fetchall()
+
+        return {"status": "success", "forms": forms}
+
+    except Exception as e:
+        # Raise an HTTP exception
+        raise HTTPException(status_code=500, detail=f"Error listing forms: {str(e)}")
+    
+    finally:
+        # Close the cursor and connection
         cursor.close()
         close_connection()
