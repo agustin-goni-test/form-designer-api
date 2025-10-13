@@ -20,12 +20,12 @@ def create_component(component: Component):
     try:
         # Insert the new component into the database
         cursor.execute('''
-            INSERT INTO form_definition.components (key, name, schema, base_component_id, category, created_at, updated_at)
+            INSERT INTO form_definition.components (key, name, description, base_component_id, category, created_at, updated_at)
             VALUES (%s, %s, %s, %s, %s, now(), now())
-            RETURNING id, key, name, schema, base_component_id, category, created_at, updated_at;
+            RETURNING id, key, name, description, base_component_id, category, created_at, updated_at;
         ''', (component.key,
               component.name,
-              json.dumps(component.schema) if component.schema else None,
+              component.description,
               getattr(component, "base_component_id", None),
               component.category
               ))

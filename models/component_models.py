@@ -1,12 +1,12 @@
 from pydantic import BaseModel
-from typing import Optional, Any
+from typing import Optional
 from datetime import datetime
 
 class Component(BaseModel):
     id: Optional[int] = None
     key: str                      # e.g. "EmailBox"
     name: str                     # e.g. "Email Input Field"
-    schema: Optional[Any] = None
+    description: Optional[str] = None
     base_component_id: Optional[int] = None
     category: str                 # e.g. "input", "choice", "layout", "custom"
     created_at: Optional[datetime] = None

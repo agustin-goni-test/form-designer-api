@@ -105,7 +105,7 @@ CREATE TABLE form_definition.components (
     id SERIAL PRIMARY KEY,
     key TEXT UNIQUE NOT NULL,              -- "EmailBox", "PhoneBox", etc.
     name TEXT NOT NULL,                    -- "Email Input Field"
-    schema JSONB NOT NULL,
+    description TEXT,
     base_component_id INTEGER REFERENCES form_definition.components(id)
         ON DELETE RESTRICT                 -- Prevent deleting a base component if others depend on it
         ON UPDATE CASCADE,                 -- If ID changes (rare), update children
@@ -121,7 +121,7 @@ COMMENT ON TABLE form_definition.components IS 'Base definitions for reusable fo
 COMMENT ON COLUMN form_definition.components.id IS 'Auto-incrementing primary key identifier';
 COMMENT ON COLUMN form_definition.components.key IS 'Human-readable identifier for the component (e.g. "EmailBox")';
 COMMENT ON COLUMN form_definition.components.name IS 'Display name of the component';
-COMMENT ON COLUMN form_definition.components.schema IS 'Detailed description of the component in JSON format';
+COMMENT ON COLUMN form_definition.components.description IS 'Component description';
 COMMENT ON COLUMN form_definition.components.base_component_id IS 'Specifies the id of the base component this component inherits from, if any';
 COMMENT ON COLUMN form_definition.components.category IS 'Category of the component (e.g. "input", "choice", "layout", "custom")';
 COMMENT ON COLUMN form_definition.components.created_at IS 'Timestamp when the component was created';
