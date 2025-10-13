@@ -1,6 +1,7 @@
 from db_handler import get_connection, close_connection
 from fastapi import HTTPException
 from models.component_models import Component
+import json
 
 def create_component(component: Component):
     """
@@ -19,12 +20,12 @@ def create_component(component: Component):
     try:
         # Insert the new component into the database
         cursor.execute('''
-            INSERT INTO form_definition.components (key, name, description, base_component_id, category, created_at, updated_at)
+            INSERT INTO form_definition.components (key, name, schema, base_component_id, category, created_at, updated_at)
             VALUES (%s, %s, %s, %s, %s, now(), now())
-            RETURNING id, key, name, description, base_component_id, category, created_at, updated_at;
+            RETURNING id, key, name, schema, base_component_id, category, created_at, updated_at;
         ''', (component.key,
               component.name,
-              component.description,
+              json.dumps(component.schema) if component.schema else None,
               getattr(component, "base_component_id", None),
               component.category
               ))
@@ -73,10 +74,10 @@ def update_component(component_id: int, component: Component):
             UPDATE form_definition.components
             SET key = %s,
                 name = %s,
-                description = %s,
+                schema = %s,
                 updated_at = now()
             WHERE id = %s
-            RETURNING id, key, name, description, created_at, updated_at;
+            RETURNING id, key, name, schema, created_at, updated_at;
         ''', (component.key, component.name, component.description, component_id))
 
         # Fetch the updated component
