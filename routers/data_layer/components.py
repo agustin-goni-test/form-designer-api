@@ -74,10 +74,10 @@ def update_component(component_id: int, component: Component):
             UPDATE form_definition.components
             SET key = %s,
                 name = %s,
-                schema = %s,
+                description = %s,
                 updated_at = now()
             WHERE id = %s
-            RETURNING id, key, name, schema, created_at, updated_at;
+            RETURNING id, key, name, description, created_at, updated_at;
         ''', (component.key, component.name, component.description, component_id))
 
         # Fetch the updated component
@@ -99,6 +99,48 @@ def update_component(component_id: int, component: Component):
 
         # Raise the exception to be handled by the caller
         raise Exception(f"Error updating component: {str(e)}")
+    
+    finally:
+        # Close the cursor and connection
+        cursor.close()
+        close_connection()
+
+
+def get_component_by_id(component_id: int):
+    """
+    Retrieve a component from the database by its ID.
+
+    Takes a component ID as input and fetches the corresponding component from the database.
+    Returns the component details if found, otherwise raises an exception.
+    """
+
+    # Get the connection to the database
+    conn = get_connection()
+
+    # Create a cursor
+    cursor = conn.cursor()
+
+    try:
+        # Query to fetch the component by ID
+        cursor.execute('''
+            SELECT id, key, name, description, base_component_id, category, created_at, updated_at
+            FROM form_definition.components
+            WHERE id = %s;
+        ''', (component_id,))
+
+        # Fetch the component
+        component = cursor.fetchone()
+
+        if not component:
+            raise Exception(f"Component with ID {component_id} not found.")
+
+        # Return the component details
+        return component
+
+    # If an exception occurs
+    except Exception as e:
+        # Raise the exception to be handled by the caller
+        raise Exception(f"Error retrieving component: {str(e)}")
     
     finally:
         # Close the cursor and connection
