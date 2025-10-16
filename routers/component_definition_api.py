@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from models.component_models import Component
 from db_handler import get_connection, close_connection
-from routers.data_layer.components import create_component, update_component, get_component_by_id
+from routers.data_layer.components import create_component, update_component, get_component_by_id, list_components_from_db, delete_component_from_db
 
 router = APIRouter(prefix="/component_definitions", tags=["Components"])
 
@@ -57,5 +57,40 @@ def get_component(component_id: int):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving component: {str(e)}")
+    
+
+@router.get("/components", summary="List all component definitions")
+def list_components():
+    '''
+    Endpoint to list all component definitions.
+    '''
+    try:
+        components = list_components_from_db()
+        return {"status": "success", "components": components}
+
+    except HTTPException as e:
+        raise
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error listing components: {str(e)}")
+
+
+@router.delete("/components/{component_id}", summary="Delete a component definition by ID")
+def delete_component(component_id: int):
+    '''
+    Endpoint to delete a component definition by its ID.
+    '''
+    try:
+        # Deletion logic here
+        # Assuming a delete_component_from_db function exists in the data layer
+        message = delete_component_from_db(component_id)
+        return message
+    
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting component: {str(e)}")        # Raise the exception to be handled by the caller
+
 
 

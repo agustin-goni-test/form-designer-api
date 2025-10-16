@@ -146,3 +146,88 @@ def get_component_by_id(component_id: int):
         # Close the cursor and connection
         cursor.close()
         close_connection()
+
+
+def list_components_from_db():
+    """
+    List all components in the database.
+
+    Fetches all components from the database and returns them as a list.
+    """
+
+    # Get the connection to the database
+    conn = get_connection()
+
+    # Create a cursor
+    cursor = conn.cursor()
+
+    try:
+        # Query to fetch all components
+        cursor.execute('''
+            SELECT id, key, name, description, base_component_id, category, created_at, updated_at
+            FROM form_definition.components;
+        ''')
+
+        # Fetch all components
+        components = cursor.fetchall()
+
+        # Return the list of components
+        return components
+
+    # If an exception occurs
+    except Exception as e:
+        # Raise the exception to be handled by the caller
+        raise Exception(f"Error listing components: {str(e)}")
+    
+    finally:
+        # Close the cursor and connection
+        cursor.close()
+        close_connection()
+
+
+def delete_component_from_db(component_id: int):
+    """
+    Delete a component from the database by its ID.
+
+    Takes a component ID as input and deletes the corresponding component from the database.
+    Returns a success message if deletion was successful, otherwise raises an exception.
+    """
+
+    # Get the connection to the database
+    conn = get_connection()
+
+    # Create a cursor
+    cursor = conn.cursor()
+
+    try:
+        # Execute the delete query
+        cursor.execute('''
+            DELETE FROM form_definition.components
+            WHERE id = %s
+            RETURNING id;
+        ''', (component_id,))
+
+        # Check if any row was deleted
+        deleted_component = cursor.fetchone()
+
+        if not deleted_component:
+            raise Exception(f"Component with ID {component_id} not found.")
+
+        # Commit the transaction
+        conn.commit()
+
+        # Return a success message
+        return {"status": "success", "message": f"Component with ID {component_id} deleted."}
+
+    # If an exception occurs
+    except Exception as e:
+        # Rollback the transaction in case of error
+        conn.rollback()
+
+        # Raise the exception to be handled by the caller
+        raise Exception(f"Error deleting component: {str(e)}")
+    
+    finally:
+        # Close the cursor and connection
+        cursor.close()
+        close_connection()
