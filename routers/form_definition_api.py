@@ -12,14 +12,36 @@ This API implements endpoints used to work with form definitions.
 For the moment, we only have mechanisms to create forms.
 '''
 
-@router.post("/forms", summary="Create a new form")
-def create_or_update_form(form: Form, form_id: int = None, update_key: bool = False):
+@router.post(
+        "/forms",
+        summary="Create a new form",
+        response_description="The created or updated form details",
+        status_code=201
+        )
+def create_or_update_form(
+    form: Form, 
+    form_id: int = None, 
+    update_key: bool = False
+    ):
     """
     Create a new form in the database, or update an existing one.
 
     Receives a JSON payload with the form details (key, name, description) and 
     inserts it into the database. Returns the newly created form details.
     If a form with the same key already exists, it updates its details instead.
+
+    **Parameters:**
+    - **form**: The form details to create or update.
+    - **form_id**: (Optional) The ID of the form to update. If not provided, a new form will be created.
+    - **update_key**: (Optional) A boolean indicating whether to update the 'key' field of the form when updating.
+
+    **Returns:**
+    - **status**: A message indicating success.
+    - **form**: The details of the created or updated form.
+
+    **Raises:**
+    - **HTTPException 400**: If form validation fails.
+    - **HTTPException 500**: If there is a database error.
     """
 
     # Determine if the input has a form_id (update) or not (create)

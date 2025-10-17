@@ -1,0 +1,107 @@
+2025-10-17 17:00:17,568 - main - INFO - [main.py:35] - Starting up the Form API application.
+2025-10-17 17:03:49,518 - main - INFO - [main.py:39] - Shutting down the Form API application.
+2025-10-17 17:03:50,139 - main - INFO - [main.py:35] - Starting up the Form API application.
+2025-10-17 17:04:01,910 - main - INFO - [main.py:23] - Incoming request: GET http://127.0.0.1:8000/component_versions/test
+2025-10-17 17:04:01,912 - routers.component_version_api - INFO - [component_version_api.py:19] - Component versions test endpoint called.
+2025-10-17 17:04:01,913 - main - INFO - [main.py:26] - Response status: 200 for GET http://127.0.0.1:8000/component_versions/test
+2025-10-17 17:08:48,409 - main - INFO - [main.py:23] - Incoming request: POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:08:48,419 - routers.component_version_api - INFO - [component_version_api.py:31] - Received request to create or update component version.
+2025-10-17 17:08:48,420 - routers.component_version_api - INFO - [component_version_api.py:41] - Creating new component version.
+2025-10-17 17:08:48,420 - routers.data_layer.component_versions - INFO - [component_versions.py:18] - Starting component version creation.
+2025-10-17 17:08:48,580 - routers.data_layer.component_versions - INFO - [component_versions.py:66] - Successfully created component version with ID: 2
+2025-10-17 17:08:48,580 - routers.component_version_api - INFO - [component_version_api.py:44] - Component version successfully created with ID: 2
+2025-10-17 17:08:48,581 - main - INFO - [main.py:26] - Response status: 200 for POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:25:23,800 - main - INFO - [main.py:23] - Incoming request: POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:25:23,807 - routers.component_version_api - INFO - [component_version_api.py:31] - Received request to create or update component version.
+2025-10-17 17:25:23,808 - routers.component_version_api - INFO - [component_version_api.py:41] - Creating new component version.
+2025-10-17 17:25:23,808 - routers.data_layer.component_versions - INFO - [component_versions.py:18] - Starting component version creation.
+2025-10-17 17:25:23,904 - routers.data_layer.component_versions - ERROR - [component_versions.py:74] - Error creating component version: duplicate key value violates unique constraint "component_versions_component_id_version_number_key"
+DETAIL:  Key (component_id, version_number)=(2, 1) already exists.
+, exc_info=True
+2025-10-17 17:25:23,905 - routers.component_version_api - ERROR - [component_version_api.py:53] - Error processing component version: Error creating component version: duplicate key value violates unique constraint "component_versions_component_id_version_number_key"
+DETAIL:  Key (component_id, version_number)=(2, 1) already exists.
+Traceback (most recent call last):
+  File "/Users/agustin/Documents/Python/TestAPI/routers/data_layer/component_versions.py", line 37, in create_component_version
+    cursor.execute('''
+    ~~~~~~~~~~~~~~^^^^
+        INSERT INTO form_definition.component_versions (
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<17 lines>...
+          json.dumps(component_version.service_bindings),
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ))
+          ^^
+  File "/Users/agustin/Documents/Python/TestAPI/venv/lib/python3.13/site-packages/psycopg2/extras.py", line 236, in execute
+    return super().execute(query, vars)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "component_versions_component_id_version_number_key"
+DETAIL:  Key (component_id, version_number)=(2, 1) already exists.
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/agustin/Documents/Python/TestAPI/routers/component_version_api.py", line 43, in create_or_update_component_version
+    new_version = create_component_version(component_version)
+  File "/Users/agustin/Documents/Python/TestAPI/routers/data_layer/component_versions.py", line 80, in create_component_version
+    raise Exception(f"Error creating component version: {str(e)}")
+Exception: Error creating component version: duplicate key value violates unique constraint "component_versions_component_id_version_number_key"
+DETAIL:  Key (component_id, version_number)=(2, 1) already exists.
+
+2025-10-17 17:25:23,915 - main - INFO - [main.py:26] - Response status: 500 for POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:27:36,079 - main - INFO - [main.py:23] - Incoming request: POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:27:36,090 - routers.component_version_api - INFO - [component_version_api.py:31] - Received request to create or update component version.
+2025-10-17 17:27:36,090 - routers.component_version_api - INFO - [component_version_api.py:41] - Creating new component version.
+2025-10-17 17:27:36,091 - routers.data_layer.component_versions - INFO - [component_versions.py:18] - Starting component version creation.
+2025-10-17 17:27:36,117 - routers.data_layer.component_versions - INFO - [component_versions.py:66] - Successfully created component version with ID: 4
+2025-10-17 17:27:36,117 - routers.component_version_api - INFO - [component_version_api.py:44] - Component version successfully created with ID: 4
+2025-10-17 17:27:36,118 - main - INFO - [main.py:26] - Response status: 200 for POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:32:50,077 - main - INFO - [main.py:39] - Shutting down the Form API application.
+2025-10-17 17:32:50,723 - main - INFO - [main.py:35] - Starting up the Form API application.
+2025-10-17 17:33:25,031 - main - INFO - [main.py:23] - Incoming request: POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:33:25,035 - main - INFO - [main.py:26] - Response status: 422 for POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:36:15,847 - main - INFO - [main.py:39] - Shutting down the Form API application.
+2025-10-17 17:36:16,486 - main - INFO - [main.py:35] - Starting up the Form API application.
+2025-10-17 17:36:25,830 - main - INFO - [main.py:23] - Incoming request: POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:36:25,834 - main - INFO - [main.py:26] - Response status: 422 for POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:38:26,251 - main - INFO - [main.py:23] - Incoming request: POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:38:26,260 - main - INFO - [main.py:26] - Response status: 422 for POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:46:14,597 - main - INFO - [main.py:39] - Shutting down the Form API application.
+2025-10-17 17:46:15,152 - main - INFO - [main.py:35] - Starting up the Form API application.
+2025-10-17 17:46:16,771 - main - INFO - [main.py:23] - Incoming request: POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:46:16,778 - main - INFO - [main.py:26] - Response status: 422 for POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:49:21,524 - main - INFO - [main.py:39] - Shutting down the Form API application.
+2025-10-17 17:49:22,199 - main - INFO - [main.py:35] - Starting up the Form API application.
+2025-10-17 17:49:24,672 - main - INFO - [main.py:23] - Incoming request: POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:49:24,674 - routers.component_version_api - INFO - [component_version_api.py:38] - Received request to create or update component version.
+2025-10-17 17:49:24,674 - routers.component_version_api - INFO - [component_version_api.py:52] - Creating new component version.
+2025-10-17 17:49:24,674 - routers.data_layer.component_versions - INFO - [component_versions.py:18] - Starting component version creation.
+2025-10-17 17:49:24,800 - routers.data_layer.component_versions - INFO - [component_versions.py:72] - Successfully created component version with ID: 5
+2025-10-17 17:49:24,801 - routers.component_version_api - INFO - [component_version_api.py:55] - Component version successfully created with ID: 5
+2025-10-17 17:49:24,801 - main - INFO - [main.py:26] - Response status: 200 for POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:55:45,747 - main - INFO - [main.py:23] - Incoming request: POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:55:45,752 - routers.component_version_api - INFO - [component_version_api.py:38] - Received request to create or update component version.
+2025-10-17 17:55:45,752 - routers.component_version_api - INFO - [component_version_api.py:52] - Creating new component version.
+2025-10-17 17:55:45,753 - routers.data_layer.component_versions - INFO - [component_versions.py:18] - Starting component version creation.
+2025-10-17 17:55:45,781 - routers.data_layer.component_versions - INFO - [component_versions.py:72] - Successfully created component version with ID: 6
+2025-10-17 17:55:45,781 - routers.component_version_api - INFO - [component_version_api.py:55] - Component version successfully created with ID: 6
+2025-10-17 17:55:45,782 - main - INFO - [main.py:26] - Response status: 200 for POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:55:49,276 - main - INFO - [main.py:23] - Incoming request: POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:55:49,278 - routers.component_version_api - INFO - [component_version_api.py:38] - Received request to create or update component version.
+2025-10-17 17:55:49,279 - routers.component_version_api - INFO - [component_version_api.py:52] - Creating new component version.
+2025-10-17 17:55:49,279 - routers.data_layer.component_versions - INFO - [component_versions.py:18] - Starting component version creation.
+2025-10-17 17:55:49,296 - routers.data_layer.component_versions - INFO - [component_versions.py:72] - Successfully created component version with ID: 7
+2025-10-17 17:55:49,296 - routers.component_version_api - INFO - [component_version_api.py:55] - Component version successfully created with ID: 7
+2025-10-17 17:55:49,297 - main - INFO - [main.py:26] - Response status: 200 for POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:56:52,550 - main - INFO - [main.py:39] - Shutting down the Form API application.
+2025-10-17 17:56:53,151 - main - INFO - [main.py:35] - Starting up the Form API application.
+2025-10-17 17:56:57,888 - main - INFO - [main.py:23] - Incoming request: POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 17:56:57,890 - routers.component_version_api - INFO - [component_version_api.py:38] - Received request to create or update component version.
+2025-10-17 17:56:57,890 - routers.component_version_api - INFO - [component_version_api.py:52] - Creating new component version.
+2025-10-17 17:56:57,890 - routers.data_layer.component_versions - INFO - [component_versions.py:18] - Starting component version creation.
+2025-10-17 17:56:57,923 - routers.data_layer.component_versions - DEBUG - [component_versions.py:29] - Next version number for component ID 2 is 5
+2025-10-17 17:56:57,923 - routers.data_layer.component_versions - DEBUG - [component_versions.py:40] - Component definition to be inserted: {'default_props': {'label': 'RUT', 'placeholder': 'Enter a RUT'}, 'validation_config': {'required': True, 'pattern': '.+@.+'}, 'service_bindings': {'endpoint': 'email-validation-service'}}
+2025-10-17 17:56:57,927 - routers.data_layer.component_versions - INFO - [component_versions.py:72] - Successfully created component version with ID: 8
+2025-10-17 17:56:57,927 - routers.data_layer.component_versions - DEBUG - [component_versions.py:92] - Database connection closed.
+2025-10-17 17:56:57,927 - routers.component_version_api - INFO - [component_version_api.py:55] - Component version successfully created with ID: 8
+2025-10-17 17:56:57,928 - main - INFO - [main.py:26] - Response status: 200 for POST http://127.0.0.1:8000/component_versions/versions

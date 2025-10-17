@@ -139,8 +139,7 @@ CREATE TABLE form_definition.component_versions (
     service_bindings JSONB,            -- Behavior endpoints for this version
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMPTZ DEFAULT now(),
-    updated_at TIMESTAMPTZ DEFAULT now(),
-    UNIQUE(component_id, version_number)
+    updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- Table comments

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
@@ -15,10 +15,14 @@ class Component(BaseModel):
 class ComponentVersion(BaseModel):
     id: Optional[int] = None
     component_id: int
-    version_number: int
-    definition: dict              # Full component definition as JSON
-    default_props: Optional[dict] = None      # Default properties as JSON
-    validation_config: Optional[dict] = None  # Validation rules as JSON
-    service_bindings: Optional[dict] = None   # Service endpoints as JSON
+    version_number: Optional[int] = None        # e.g. 1, 2, 3
+    definition: Optional[dict] = None         # Full component definition as JSON
+
+    # Field class allows for empty values to be empty dicts instead of None
+    default_props: Optional[dict] = Field(default_factory=dict)      # Default properties as JSON
+    validation_config: Optional[dict] = Field(default_factory=dict)  # Validation rules as JSON
+    service_bindings: Optional[dict] = Field(default_factory=dict)   # Service endpoints as JSON
+    
     is_active: bool = True
     created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
