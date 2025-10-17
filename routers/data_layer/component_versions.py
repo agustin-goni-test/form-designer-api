@@ -198,3 +198,92 @@ def update_component_version(component_version: ComponentVersion):
     finally:
         # Close the cursor and connection
         cursor
+
+def get_component_version_from_db(component_id: int, version_number: int):
+    '''
+    Retrieve a component version from the database by component ID and version number.
+    '''
+
+    logger.info(f"Retrieving component version for component_id={component_id} and version_number={version_number}")
+
+    # Get the connection to the database
+    conn = get_connection()
+
+    # Create a cursor
+    cursor = conn.cursor()
+
+    try:
+        logger.debug(f"Executing query to retrieve component version for component_id={component_id} and version_number={version_number}")
+        # Retrieve the component version
+        cursor.execute('''
+            SELECT id, component_id, version_number, definition,
+                   default_props, validation_config, service_bindings, is_active, created_at, updated_at
+            FROM form_definition.component_versions
+            WHERE component_id = %s AND version_number = %s;
+        ''', (component_id, version_number))
+
+        component_version = cursor.fetchone()
+
+        if component_version is None:
+            logger.error(f"Component version not found for component_id={component_id} and version_number={version_number}")
+            raise Exception(f"Component version not found for component_id={component_id} and version_number={version_number}")
+
+        # Return the component version details
+        return component_version
+
+    # If an exception occurs
+    except Exception as e:
+        logger.error(f"Error retrieving component version for component_id={component_id} and version_number={version_number}: {str(e)}", exc_info=True)    
+        # Raise an exception to be handled by the caller
+        raise Exception(f"Error retrieving component version: {str(e)}")
+    
+    finally:
+        # Close the cursor and connection
+        cursor.close()
+        close_connection()
+
+
+def get_latest_component_version_from_db(component_id: int):
+    '''
+    Retrieve the latest component version from the database by component ID.
+    '''
+
+    logger.info(f"Retrieving latest component version for component_id={component_id}")
+
+    # Get the connection to the database
+    conn = get_connection()
+
+    # Create a cursor
+    cursor = conn.cursor()
+
+    try:
+        logger.debug(f"Executing query to retrieve latest component version for component_id={component_id}")
+        # Retrieve the latest component version
+        cursor.execute('''
+            SELECT id, component_id, version_number, definition,
+                   default_props, validation_config, service_bindings, is_active, created_at, updated_at
+            FROM form_definition.component_versions
+            WHERE component_id = %s
+            ORDER BY version_number DESC
+            LIMIT 1;
+        ''', (component_id,))
+
+        component_version = cursor.fetchone()
+
+        if component_version is None:
+            logger.error(f"No component versions found for component_id={component_id}")
+            raise Exception(f"No component versions found for component_id={component_id}")
+
+        # Return the latest component version details
+        return component_version
+
+    # If an exception occurs
+    except Exception as e:
+        logger.error(f"Error retrieving latest component version for component_id={component_id}: {str(e)}", exc_info=True)    
+        # Raise an exception to be handled by the caller
+        raise Exception(f"Error retrieving latest component version: {str(e)}")
+    
+    finally:
+        # Close the cursor and connection
+        cursor.close()
+        close_connection()

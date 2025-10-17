@@ -105,3 +105,5 @@ DETAIL:  Key (component_id, version_number)=(2, 1) already exists.
 2025-10-17 17:56:57,927 - routers.data_layer.component_versions - DEBUG - [component_versions.py:92] - Database connection closed.
 2025-10-17 17:56:57,927 - routers.component_version_api - INFO - [component_version_api.py:55] - Component version successfully created with ID: 8
 2025-10-17 17:56:57,928 - main - INFO - [main.py:26] - Response status: 200 for POST http://127.0.0.1:8000/component_versions/versions
+2025-10-17 18:07:48,791 - main - INFO - [main.py:39] - Shutting down the Form API application.
+2025-10-17 18:07:49,366 - main - INFO - [main.py:35] - Starting up the Form API application.

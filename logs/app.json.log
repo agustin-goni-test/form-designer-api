@@ -79,3 +79,5 @@
 {"timestamp": "2025-10-17 17:56:57,927", "level": "DEBUG", "logger": "routers.data_layer.component_versions", "message": "Database connection closed.", "module": "component_versions", "function": "create_component_version", "line": 92}
 {"timestamp": "2025-10-17 17:56:57,927", "level": "INFO", "logger": "routers.component_version_api", "message": "Component version successfully created with ID: 8", "module": "component_version_api", "function": "create_or_update_component_version", "line": 55}
 {"timestamp": "2025-10-17 17:56:57,928", "level": "INFO", "logger": "main", "message": "Response status: 200 for POST http://127.0.0.1:8000/component_versions/versions", "module": "main", "function": "log_requests", "line": 26}
+{"timestamp": "2025-10-17 18:07:48,791", "level": "INFO", "logger": "main", "message": "Shutting down the Form API application.", "module": "main", "function": "shutdown_event", "line": 39}
+{"timestamp": "2025-10-17 18:07:49,366", "level": "INFO", "logger": "main", "message": "Starting up the Form API application.", "module": "main", "function": "startup_event", "line": 35}
