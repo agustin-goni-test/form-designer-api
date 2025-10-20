@@ -114,7 +114,9 @@ def _find_next_version_number(component_id: int, conn) -> int:
         cursor.close()
 
 
-def update_component_version(component_version: ComponentVersion):
+def update_component_version(component_id: int,
+                             version_number: int,
+                             component_version: ComponentVersion):
     """
     Handle updating an existing component version in the database.
 
@@ -124,10 +126,9 @@ def update_component_version(component_version: ComponentVersion):
     """
 
     # Log the start of the process
-    logger.info(f"Starting update for component id {component_version.component_id} with version number: {component_version.version_number}")
+    logger.info(f"Starting update for component id {component_id} with version number: {version_number}")
 
     # Validate if version number is present, otherwise raise error
-    version_number = component_version.version_number
     if not version_number:
         error_msg = "Component version number must be provided for update."
         logger.error(error_msg)
@@ -149,7 +150,7 @@ def update_component_version(component_version: ComponentVersion):
         logger.debug(f"Component definition to be updated: {definition}")
 
         # Get id of the record to update
-        record_id = _get_record_id(component_version.component_id, version_number, conn)
+        record_id = _get_record_id(component_id, version_number, conn)
         logger.debug(f"Record ID to be updated: {record_id}")
 
         # Update the existing component version in the database
@@ -168,8 +169,8 @@ def update_component_version(component_version: ComponentVersion):
             WHERE id = %s
             RETURNING id, component_id, version_number, definition,
                       default_props, validation_config, service_bindings, is_active, created_at, updated_at;
-        ''', (component_version.component_id,
-              component_version.version_number,
+        ''', (component_id,
+              version_number,
               json.dumps(definition),
               json.dumps(component_version.default_props),
               json.dumps(component_version.validation_config),
@@ -321,5 +322,50 @@ def get_latest_component_version_from_db(component_id: int):
     
     finally:
         # Close the cursor and connection
+        cursor.close()
+        close_connection()
+
+
+def get_all_versions_from_db(component_id: int):
+    '''
+    Retrieve all versions for the component
+    '''
+
+    logger.info(f"Retrieving all component versions for component_id={component_id}")
+
+    # Get the connection to the database
+    conn = get_connection()
+
+    # Create a cursor
+    cursor = conn.cursor()
+
+    try:
+        logger.debug(f"Executing query to retrieve latest component version for component_id={component_id}")
+
+        # Execute query
+        cursor.execute('''
+            SELECT id, component_id, version_number, definition,
+                   default_props, validation_config, service_bindings, is_active, created_at, updated_at
+            FROM form_definition.component_versions
+            WHERE component_id = %s
+            ORDER BY version_number DESC
+        ''', (component_id,))
+
+        # Get all versions
+        components = cursor.fetchall()
+
+        # Check if the list is empty and raise exception
+        if components is None:
+            logger.error(f"No component versions found for component_id={component_id}")
+            raise Exception(f"No component versions found for component_id={component_id}")
+
+        # Return the version list
+        return components
+
+    except Exception as e:
+        logger.error(f"Error retrieving the version list for component {component_id}: {str(e)}")
+        raise Exception(f"Error retrieving version list: {str(e)}")
+    
+    finally:
         cursor.close()
         close_connection()
