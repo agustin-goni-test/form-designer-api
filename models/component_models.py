@@ -14,7 +14,7 @@ class Component(BaseModel):
 
 class ComponentVersion(BaseModel):
     id: Optional[int] = None
-    component_id: int
+    component_id: Optional[int] = None
     version_number: Optional[int] = None        # e.g. 1, 2, 3
     definition: Optional[dict] = None         # Full component definition as JSON
 

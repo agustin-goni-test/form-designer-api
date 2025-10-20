@@ -6,7 +6,7 @@ from logger import get_logger
 
 logger = get_logger(__name__)
 
-def create_component_version(component_version: ComponentVersion):
+def create_component_version(component_id: int, component_version: ComponentVersion):
     """
     Handle creation of new component version in the database.
 
@@ -25,8 +25,8 @@ def create_component_version(component_version: ComponentVersion):
 
     try:
         # Find next version number
-        next_version_number = _find_next_version_number(component_version.component_id, conn)
-        logger.debug(f"Next version number for component ID {component_version.component_id} is {next_version_number}") 
+        next_version_number = _find_next_version_number(component_id, conn)
+        logger.debug(f"Next version number for component ID {component_id} is {next_version_number}") 
         
         # Update input with the correct next version number. If the user provided one, ignore it.
         component_version.version_number = next_version_number
@@ -54,7 +54,7 @@ def create_component_version(component_version: ComponentVersion):
             VALUES (%s, %s, %s, %s, %s, %s, True, now(), now())
             RETURNING id, component_id, version_number, definition,
                        default_props, validation_config, service_bindings, is_active, created_at, updated_at;
-        ''', (component_version.component_id,
+        ''', (component_id,
               component_version.version_number,
               json.dumps(definition),
               json.dumps(component_version.default_props),
@@ -148,6 +148,10 @@ def update_component_version(component_version: ComponentVersion):
 
         logger.debug(f"Component definition to be updated: {definition}")
 
+        # Get id of the record to update
+        record_id = _get_record_id(component_version.component_id, version_number, conn)
+        logger.debug(f"Record ID to be updated: {record_id}")
+
         # Update the existing component version in the database
         # Active status does not change.
         # Version number does not change either (it's an update, not a new version).
@@ -170,7 +174,7 @@ def update_component_version(component_version: ComponentVersion):
               json.dumps(component_version.default_props),
               json.dumps(component_version.validation_config),
               json.dumps(component_version.service_bindings),
-              component_version.id))
+              record_id))
 
         # Fetch the updated component version
         updated_component_version = cursor.fetchone()
@@ -187,7 +191,7 @@ def update_component_version(component_version: ComponentVersion):
     # If an exception occurs
     except Exception as e:
         # Log error
-        logger.error(f"Error updating component version ID {version_id}: {str(e)}", exc_info=True)
+        logger.error(f"Error updating component version ID {component_version.id}: {str(e)}", exc_info=True)
 
         # Rollback the transaction in case of error
         conn.rollback()
@@ -197,7 +201,39 @@ def update_component_version(component_version: ComponentVersion):
     
     finally:
         # Close the cursor and connection
-        cursor
+        cursor.close()
+        close_connection()
+
+
+# Helper method to get record ID
+def _get_record_id(component_id: int, version_number: int, conn) -> int:
+    '''
+    Internal helper to get the database record ID for a given component ID and version number.
+    '''
+
+    cursor = conn.cursor()
+
+    try:
+        # Retrieve the record ID
+        cursor.execute('''
+            SELECT id FROM form_definition.component_versions
+            WHERE component_id = %s AND version_number = %s;
+        ''', (component_id, version_number))
+
+        record = cursor.fetchone()
+
+        if record is None:
+            raise Exception(f"Component version not found for component_id={component_id} and version_number={version_number}")
+
+        return record['id']
+
+    # If an exception occurs
+    except Exception as e:
+        raise Exception(f"Error retrieving record ID: {str(e)}")
+    
+    finally:
+        cursor.close()  
+        
 
 def get_component_version_from_db(component_id: int, version_number: int):
     '''
