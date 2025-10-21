@@ -114,6 +114,7 @@ def _find_next_version_number(component_id: int, conn) -> int:
         cursor.close()
 
 
+# Method to update a component version
 def update_component_version(component_id: int,
                              version_number: int,
                              component_version: ComponentVersion):
@@ -236,6 +237,7 @@ def _get_record_id(component_id: int, version_number: int, conn) -> int:
         cursor.close()  
         
 
+# Method to obtain a component version
 def get_component_version_from_db(component_id: int, version_number: int):
     '''
     Retrieve a component version from the database by component ID and version number.
@@ -280,6 +282,7 @@ def get_component_version_from_db(component_id: int, version_number: int):
         close_connection()
 
 
+# Method to obtain the latest version of a component
 def get_latest_component_version_from_db(component_id: int):
     '''
     Retrieve the latest component version from the database by component ID.
@@ -326,6 +329,7 @@ def get_latest_component_version_from_db(component_id: int):
         close_connection()
 
 
+# Method to obtain all versions of a component
 def get_all_versions_from_db(component_id: int):
     '''
     Retrieve all versions for the component
@@ -369,3 +373,79 @@ def get_all_versions_from_db(component_id: int):
     finally:
         cursor.close()
         close_connection()
+
+
+# Method to delete a specific version of a component
+def delete_component_version_from_db(component_id: int, version_id: int):
+    '''
+    Delete a particular component version. Physical delete (row is eliminated)
+    '''
+
+    logger.info(f"Deleting from database component version {version_id} for component_id={component_id}")
+
+    # Get the connection to the database
+    conn = get_connection()
+
+    # Create a cursor
+    cursor = conn.cursor()
+
+    try:
+        logger.info(f"Executing DELETE for version {version_id} of compoent with id {component_id}")
+
+        # Delete row
+        cursor.execute('''
+            DELETE FROM form_definition.component_versions 
+            WHERE component_id = %s 
+            AND version_number = %s;
+        ''', (component_id, version_id))
+
+        # Obtain info of deleted row
+        deleted_row = cursor.fetchone()
+
+        # If nothing was deleted, log a warning and raise exception
+        if not deleted_row:
+            logger.warning(f"No record found for version {version_id} for component with id {component_id}")
+            raise Exception(f"Version {version_id} not found for component with ID {component_id}.")
+            
+
+        # Log success (only happens if deletion worked)
+        logger.info(f"Successfully deleted version {version_id} of component with id {component_id}")
+
+        # Commit changes
+        conn.commit()
+
+        # Return message
+        return {"status": "Version successfully deleted", 
+                "message": f"Version {version_id} for component {component_id} deleted."}
+
+    except Exception as e:
+        logger.error(f"Failed to delete version {version_id} of component with id {component_id}")
+        raise Exception(f"Error deleting component version: {str(e)}")
+    
+    finally:
+        cursor.close()
+        close_connection()
+
+
+# Method to delete the latest version of a component
+def delete_lastest_version_from_db(component_id: int):
+    '''
+    Delete the latest version of the component.
+
+    Uses the generic method delete_component_version_from_db which takes a component and
+    a version number. First, it retrieves the right version. If no version is found, raises exception.
+    '''
+
+    # Find latest version
+    version = get_latest_component_version_from_db(component_id)
+
+    if not version:
+        logger.warning(f"No version was found for component id {component_id}")
+        raise Exception(f"No version found for component id {component_id}")
+    
+    # Obtain the version number
+    version_number = version['version_number']
+    logger.info(f"Latest component version is {version_number}... attempting to delete.")
+
+    # Call detele method that is already generic for any version
+    return delete_component_version_from_db(component_id, version_number)

@@ -3,6 +3,7 @@ from models.component_models import ComponentVersion
 from routers.data_layer.component_versions import create_component_version, update_component_version
 from routers.data_layer.component_versions import get_component_version_from_db, get_latest_component_version_from_db
 from routers.data_layer.component_versions import get_all_versions_from_db
+from routers.data_layer.component_versions import delete_component_version_from_db, delete_lastest_version_from_db
 from logger import get_logger
 from typing import Optional
 
@@ -25,8 +26,8 @@ def test_component_version_endpoint():
 
 
 
-@router.post("/{component_id}/versions", summary="Create a new component")
-@router.post("/{component_id}/versions/{version_id}", summary="Update new component version")
+@router.post("/{component_id}/versions", summary="Create a new component version")
+@router.post("/{component_id}/versions/{version_id}", summary="Update a component version")
 def create_or_update_component_version(component_id: int, 
                                        component_version: ComponentVersion,
                                        version_id: Optional[int] = None):
@@ -101,7 +102,7 @@ def get_component_version(component_id: int, version_id: int):
 
 
 
-@router.get("/{component_id}/all-versions", summary="Obtain latest version of a component")
+@router.get("/{component_id}/all-versions", summary="Obtain all versions of a component")
 def get_version_list(component_id: int):
     '''
     Endpoint to get all versions for a component.
@@ -143,3 +144,44 @@ def get_latest_version_from_db(component_id: int):
     except Exception as e:
         logger.error(f"Error obtaining latest version of component {component_id}: {str(e)}")
 
+
+@router.delete("/{component_id}/versions/{version_id}", summary="Delete a specific version of a component")
+@router.delete("/{component_id}/versions", summary="Delete the latest version of a component")
+def delete_component_version(component_id: int, version_id: int = None):
+    '''
+    Endpoint to delete a particular version of a component (without eliminating the component).
+
+    It instantiates a physical delete. Raises an exception if no version is provided.
+    '''
+
+    try:
+        # If a version id is provided, it means we are deleting a specific version
+        if version_id:
+
+            # Log message
+            logger.info(f"Deleting version {version_id} of component with id {component_id}")
+            
+            # Call delete
+            mensaje = delete_component_version_from_db(component_id, version_id)
+            
+            # Return result
+            return mensaje
+        
+        # If no version id is provided, we will delete the latest version
+        else:
+
+            # Log message
+            logger.info(f"Deleting latest version of component with id {component_id}")
+            
+            # Call delete
+            mensaje = delete_lastest_version_from_db(component_id)
+            
+            # Return message
+            return mensaje
+
+    except HTTPException:
+        logger.warning("HTTPException attempting the delete a component version...")
+        raise
+
+    except Exception as e:
+        logger.error(f"Error attempting to delete version {version_id} of component {component_id}")
