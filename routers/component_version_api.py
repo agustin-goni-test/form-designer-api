@@ -184,4 +184,4 @@ def delete_component_version(component_id: int, version_id: int = None):
         raise
 
     except Exception as e:
-        logger.error(f"Error attempting to delete version {version_id} of component {component_id}")
+        logger.error(f"Error attempting to delete version {version_id} of component {component_id}: {str(e)}")

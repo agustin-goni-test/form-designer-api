@@ -396,7 +396,8 @@ def delete_component_version_from_db(component_id: int, version_id: int):
         cursor.execute('''
             DELETE FROM form_definition.component_versions 
             WHERE component_id = %s 
-            AND version_number = %s;
+            AND version_number = %s
+            RETURNING component_id, version_number;
         ''', (component_id, version_id))
 
         # Obtain info of deleted row
