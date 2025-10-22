@@ -3,7 +3,7 @@ from models.component_models import ComponentVersion
 from routers.data_layer.component_versions import create_component_version, update_component_version
 from routers.data_layer.component_versions import get_component_version_from_db, get_latest_component_version_from_db
 from routers.data_layer.component_versions import get_all_versions_from_db
-from routers.data_layer.component_versions import delete_component_version_from_db, delete_lastest_version_from_db
+from routers.data_layer.component_versions import delete_component_version_from_db, delete_lastest_version_from_db, delete_all_versions_from_db
 from logger import get_logger
 from typing import Optional
 
@@ -174,10 +174,10 @@ def delete_component_version(component_id: int, version_id: int = None):
             logger.info(f"Deleting latest version of component with id {component_id}")
             
             # Call delete
-            mensaje = delete_lastest_version_from_db(component_id)
+            message = delete_lastest_version_from_db(component_id)
             
             # Return message
-            return mensaje
+            return message
 
     except HTTPException:
         logger.warning("HTTPException attempting the delete a component version...")
@@ -185,3 +185,28 @@ def delete_component_version(component_id: int, version_id: int = None):
 
     except Exception as e:
         logger.error(f"Error attempting to delete version {version_id} of component {component_id}: {str(e)}")
+
+
+@router.delete("/{component_id}/all-versions", summary="Delete all versions of a component")
+def delete_all_versions(component_id: int):
+    '''
+    Method to delete all the versions of a particular component.
+    '''
+
+    logger.info(f"Deleting all versions for component with id = {component_id}")
+
+    try:
+        logger.info(f"Deleting all versions for component id {component_id}")
+
+        # Call database method        
+        message = delete_all_versions_from_db(component_id)
+
+        # Return response message.
+        return message
+
+    except HTTPException:
+        logger.warning("HTTPException when attempting to delete all versions of a component.")
+        raise
+
+    except Exception as e:
+        logger.error(f"Failed to delete all version for component id {component_id}: {str(e)}")

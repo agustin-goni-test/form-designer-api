@@ -450,3 +450,55 @@ def delete_lastest_version_from_db(component_id: int):
 
     # Call detele method that is already generic for any version
     return delete_component_version_from_db(component_id, version_number)
+
+
+def delete_all_versions_from_db(component_id: int):
+    '''
+    Delete all versions of a particular component. Physical delete (row is eliminated)
+    '''
+
+    logger.info(f"Attempting to delete all versions of component id {component_id}")
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    try:
+        logger.info(f"Deleting all versions for component id {component_id}")
+
+        # Delete rows
+        cursor.execute('''
+            DELETE FROM form_definition.component_versions 
+            WHERE component_id = %s 
+            RETURNING component_id, version_number;
+        ''', (component_id, ))
+
+        deleted_rows = cursor.fetchall()
+
+        if not deleted_rows:
+            logger.warning(f"No versions found for component id {component_id}")
+            raise Exception(f"No versions found for component id {component_id}")
+        
+        # Obtain number of deleted rows
+        number_of_rows = len(deleted_rows)
+
+        # Obtain version numbers
+        versions = [row['version_number'] for row in deleted_rows]
+
+        logger.info(f"A total of {number_of_rows} rows deleted")
+        logger.info(f"List of deleted versions: {versions}")
+
+        # Commit changes
+        conn.commit()
+
+        # Return message
+        return {"status": "Version successfully deleted", 
+                "message": f"All versions for component {component_id} deleted."}
+
+    except Exception as e:
+        logger.warning(f"Delete operation failed for component with id {component_id}")
+        raise Exception(f"Delete operation failed for component with id {component_id}")
+
+    finally:
+        cursor.close()
+        close_connection()     
