@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from models.form_models import FormVersion
 from logger import get_logger
+from routers.data_layer.form_versions import create_form_version 
+from models.form_models import FormVersion
 
 # Initialize logger
 logger = get_logger(__name__)
@@ -22,7 +24,9 @@ def test_form_version_endpoint():
 
 @router.post("/forms/{form_id}/versions", summary="Create a new form version")
 @router.post("/forms/{form_id}/versions/{version_id}", summary="Update a specific version of a form")
-def create_or_update_form_version(form_id: int, version_id: int = None):
+def create_or_update_form_version(form_id: int,
+                                  form_version: FormVersion,
+                                  version_id: int = None):
     '''
     Method to create or update a form version.
     
@@ -38,6 +42,7 @@ def create_or_update_form_version(form_id: int, version_id: int = None):
             logger.info(f"Attempting to update version {version_id} of form {form_id}")
 
             # Call database operation
+            
 
             # Return message
             return {"status": "Version updates successfully"}
@@ -47,9 +52,10 @@ def create_or_update_form_version(form_id: int, version_id: int = None):
             logger.info(f"Attempting to create a new version for form {form_id}")
 
             # Call database operation
+            message = create_form_version(form_id, form_version)
 
             # Return message
-            return {"status": "New version created successfully"}
+            return message
 
     except HTTPException:
         logger.warning("HTTPException while creating or updating a form version")
