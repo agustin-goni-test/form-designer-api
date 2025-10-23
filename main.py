@@ -1,6 +1,7 @@
 # main.py
 from fastapi import FastAPI, HTTPException
 from routers import test_api, form_definition_api,  component_definition_api, component_version_api
+from routers import form_versions_api
 import logging
 from logger import setup_logging, get_logger
 
@@ -16,6 +17,7 @@ app.include_router(test_api.router)
 app.include_router(form_definition_api.router)
 app.include_router(component_definition_api.router)
 app.include_router(component_version_api.router)  # Added router for component definitions
+app.include_router(form_versions_api.router) 
 
 # Middleware for request logging
 @app.middleware("http")
