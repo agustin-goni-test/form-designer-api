@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from models.form_models import FormVersion
 from logger import get_logger
-from routers.data_layer.form_versions import create_form_version 
+from routers.data_layer.form_versions import create_form_version, update_form_version 
 from models.form_models import FormVersion
 
 # Initialize logger
@@ -42,10 +44,16 @@ def create_or_update_form_version(form_id: int,
             logger.info(f"Attempting to update version {version_id} of form {form_id}")
 
             # Call database operation
-            
+            message = update_form_version(form_id, version_id, form_version)
 
-            # Return message
-            return {"status": "Version updates successfully"}
+            # Return message with status code 200 (OK)
+            return JSONResponse(
+                status_code = 200,
+                content = {
+                    "status": "Version updated successfully",
+                    "data": jsonable_encoder(message)
+                }
+            )
 
         else:
             # Log the creation operation
@@ -54,8 +62,14 @@ def create_or_update_form_version(form_id: int,
             # Call database operation
             message = create_form_version(form_id, form_version)
 
-            # Return message
-            return message
+            # Return message with explicit 201 status code (Created)
+            return JSONResponse(
+                status_code = 201,
+                content = {
+                    "status": "Version created successfully",
+                    "data": jsonable_encoder(message)
+                }
+            )
 
     except HTTPException:
         logger.warning("HTTPException while creating or updating a form version")

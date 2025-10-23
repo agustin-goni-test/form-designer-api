@@ -59,8 +59,7 @@ def create_form_version(form_id: int, form_version: FormVersion):
         logger.info(f"Row with id={new_id} created to store version {next_version} of form {form_id}")
 
         # Return the new form version details
-        return {"status": "Version created successfully",
-                "form_version": new_version}
+        return new_version
 
     except Exception as e:
         logger.error(f"Error creating form version: {str(e)}")
@@ -93,4 +92,86 @@ def _find_next_version_number(form_id: int, conn) -> int:
         raise Exception(f"Error finding next version number: {str(e)}")
 
     finally:
+        cursor.close()
+
+
+def update_form_version(form_id: int, version_id: int, form_version: FormVersion):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Find the id of the record to be updated
+        # This is not quite necessary (additional step), but helps with clarity
+        row_id = _get_record_id(form_id, version_id, conn)
+
+        # Update row using the id
+        cursor.execute('''
+            UPDATE form_definition.form_versions
+            SET form_id = %s,
+                version_number = %s,
+                key = %s,
+                schema = %s,
+                is_active = true,
+                updated_at = now()
+            WHERE id = %s
+            RETURNING *;
+        ''', (form_id,
+              version_id,
+              form_version.key,
+              json.dumps(form_version.schema),
+              row_id))
+
+        # Fetch the updated component version
+        new_version = cursor.fetchone()
+
+        # Commit the transaction
+        conn.commit()
+
+        # Log the results
+        logger.info("OK")
+
+        # Return the updated component version details
+        return new_version
+
+    except Exception as e:
+        conn.rollback()
+        raise Exception(f"Error updating form version: {str(e)}")
+    
+    finally:
+        cursor.close()
+        close_connection()
+
+
+def _get_record_id(form_id: int, version_id: int, conn) -> int:
+    '''
+    Get the id for the corresponding row.
+    '''
+    logger.info(f"Obtaining record id for the selected version...")
+
+    # Create cursor
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute('''
+            SELECT id FROM form_definition.form_versions
+            WHERE form_id = %s AND version_number = %s;
+        ''', (form_id, version_id))
+
+        # Obtain the record
+        record = cursor.fetchone()
+
+        # If no record found, raise exception
+        if record is None:
+            logger.warning("Version not found.")
+            raise Exception(f"Version {version_id} to update form {form_id} not found.")
+
+        # Return id  
+        return record['id']
+
+    except Exception as e:
+        logger.warning("Failed to find the version to update.")
+        raise Exception(f"Failed to find the version to update: {str(e)}")
+    
+    finally:
+        logger.info("Exiting method that obtains the record id...")
         cursor.close()
